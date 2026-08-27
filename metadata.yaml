@@ -1,0 +1,10 @@
+name: astrbot_plugin_ask
+display_name: AI 助手问答
+desc: 使用 /ask 命令，以固定的 AI 助手人设回答用户问题，不继承 AstrBot 主配置的人设。支持多轮上下文、合并转发发送、冷却时间与权限控制。
+short_desc: /ask 固定人设 AI 问答，支持合并转发
+version: v1.0.0
+author: astrbot_plugin_ask
+support_platforms:
+  - aiocqhttp
+  - telegram
+  - discord
