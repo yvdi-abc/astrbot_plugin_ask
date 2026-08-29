@@ -8,7 +8,10 @@
     "description": "LLM 来源：astrbot=复用 AstrBot 已配置的模型；custom=插件内单独配置 API",
     "type": "string",
     "default": "astrbot",
-    "options": ["astrbot", "custom"],
+    "options": [
+      "astrbot",
+      "custom"
+    ],
     "hint": "astrbot 模式复用管理面板中已配置的模型与密钥，custom 模式使用下方自定义配置"
   },
   "base_url": {
@@ -28,6 +31,12 @@
     "type": "string",
     "default": "",
     "hint": "如 gpt-4o-mini、deepseek-chat 等"
+  },
+  "timeout": {
+    "description": "自定义 API 请求超时时间（秒）",
+    "type": "int",
+    "default": 120,
+    "hint": "custom 模式请求超时"
   },
   "system_prompt": {
     "description": "AI 助手人设（/ask 回答时使用的系统提示词，不继承 AstrBot 主配置人设）",
@@ -57,7 +66,10 @@
     "description": "谁可以使用 /ask 命令",
     "type": "string",
     "default": "everyone",
-    "options": ["everyone", "admin"],
+    "options": [
+      "everyone",
+      "admin"
+    ],
     "hint": "everyone=所有人可用，admin=仅管理员可用"
   },
   "cooldown": {
