@@ -96,7 +96,12 @@ class AskPlugin(Star):
 
         if self.config.get("llm_mode", "astrbot") == "custom":
             # 自定义模式：直接调用 OpenAI 兼容 API
-            from openai import AsyncOpenAI
+            try:
+                from openai import AsyncOpenAI
+            except ImportError:
+                raise ValueError(
+                    "custom 模式需要安装 openai 库（pip install openai），或切换到 astrbot 模式复用已配置模型"
+                )
 
             base_url = str(self.config.get("base_url", "") or "").rstrip("/")
             api_key = str(self.config.get("api_key", "") or "")
@@ -108,12 +113,20 @@ class AskPlugin(Star):
             messages.extend(history)
             messages.append({"role": "user", "content": question})
 
-            client = AsyncOpenAI(api_key=api_key, base_url=base_url)
-            resp = await client.chat.completions.create(
-                model=model,
-                messages=messages,
+            client = AsyncOpenAI(
+                api_key=api_key,
+                base_url=base_url,
+                timeout=float(self.config.get("timeout", 120) or 120),
             )
-            text = (resp.choices[0].message.content or "").strip()
+            try:
+                resp = await client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                )
+            finally:
+                await client.close()
+            choices = resp.choices
+            text = (choices[0].message.content or "").strip() if choices else ""
         else:
             # 复用 AstrBot 已配置的 Provider
             provider = self.context.get_using_provider(umo=event.unified_msg_origin)
@@ -171,11 +184,17 @@ class AskPlugin(Star):
             return
 
         question = (question or "").strip()
-        # /ask clear —— 清空会话历史
+        # /ask clear —— 清空会话历史（不受冷却限制，且清除冷却记录）
         if question.lower() in ("clear", "清除", "清空"):
             self._histories.pop(session_key, None)
-            self._last_use[session_key] = time.time()
+            self._last_use.pop(session_key, None)
             yield event.plain_result("✅ 已清空当前会话的 /ask 对话历史")
+            return
+
+        # 冷却检查（放在 clear 之后，冷却中也能清空历史）
+        remain = self._check_cooldown(session_key)
+        if remain:
+            yield event.plain_result(f"⏳ 请求过于频繁，请 {remain} 秒后再试")
             return
 
         if not question:
