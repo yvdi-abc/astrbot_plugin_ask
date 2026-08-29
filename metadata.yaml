@@ -4,6 +4,7 @@ desc: 使用 /ask 命令，以固定的 AI 助手人设回答用户问题，不�
 short_desc: /ask 固定人设 AI 问答，支持合并转发
 version: v1.0.0
 author: yvdi-abc
+astrbot_version: ">=4.16,<5"
 support_platforms:
   - aiocqhttp
   - telegram
